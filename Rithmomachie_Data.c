@@ -2,11 +2,20 @@
 
 
 #include"Rithmomachie_Data.h"
+#include "Jeu.h"
+#include"Menu.h"
 
 float largeur_ecran;
 float hauteur_ecran;
 COORDPOINT centre_ecran;
+//ALLEGRO_EVENT_QUEUE *event_queue;
+ALLEGRO_DISPLAY_MODE mode;
+ALLEGRO_DISPLAY *display;
+ALLEGRO_TIMER *timer;
+ALLEGRO_BITMAP *icone;
 ALLEGRO_BITMAP* Fond = NULL;
+int activite_encours, framerate = 100, chrono = 0, nbmode, reafficher=1, fin =0;
+bool paused = false;
 
 double duree=10.0f;
 double progression=0.0f;
@@ -21,101 +30,46 @@ void Reset_progress(void)
     duree=10.0f;
     progression=0.0f;
 }
-void Afficher_titre(void)
+
+void erreur( const char*txt)
 {
-    ALLEGRO_BITMAP *n_titre, *titre, *separator;
-    titre=al_load_bitmap("R_title.png");
-    separator=al_load_bitmap("R_titre_separateur.png");
-    n_titre=al_create_bitmap((int)largeur_ecran,(int)hauteur_ecran);
-    al_set_target_bitmap(n_titre);
-    al_clear_to_color(al_map_rgba(0,0,0,0));
-    al_draw_bitmap(separator,largeur_ecran/2.0-al_get_bitmap_width(separator)/2.0,
-                   hauteur_ecran/2.0-al_get_bitmap_height(separator)/2.0-5,0);
-    al_draw_bitmap_region(titre,
-                          0,0,
-                          progression/duree*al_get_bitmap_width(titre)/2.0,al_get_bitmap_height(titre),
-                          largeur_ecran/2.0-2-progression/duree*al_get_bitmap_width(titre)/2.0,hauteur_ecran/2.0-al_get_bitmap_height(titre)/2.0,0);
-    al_draw_bitmap_region(titre,
-                          al_get_bitmap_width(titre)-progression/duree*al_get_bitmap_width(titre)/2.0,0,
-                          progression/duree*al_get_bitmap_width(titre)/2.0,al_get_bitmap_height(titre),
-                          largeur_ecran/2.0+2,hauteur_ecran/2-al_get_bitmap_height(titre)/2.0,0);
-
-    al_set_target_backbuffer(display);
-    al_draw_bitmap(n_titre,0,0,0);
-    al_destroy_bitmap(n_titre);
-    al_destroy_bitmap(titre);
-    al_destroy_bitmap(separator);
-
+    ALLEGRO_DISPLAY *d;
+    d = al_is_system_installed( )? al_get_current_display( ) : NULL;
+    al_show_native_message_box( d, "ERREUR", txt, NULL, NULL, 0);
+    exit( EXIT_FAILURE);
 }
 
-void Afficher_progression(void)
+void Config_activite(int activite)
 {
-   ALLEGRO_BITMAP *n_chargement, *chargement_1, *chargement_2, *chargement_3;
-   float x=683, y=683;
-   chargement_1=al_load_bitmap("chargement_1.png");
-   chargement_2=al_load_bitmap("chargement_2.png");
-   chargement_3=al_load_bitmap("chargement_3.png");
-   n_chargement=al_create_bitmap((int)largeur_ecran,(int)hauteur_ecran);
-   al_set_target_bitmap(n_chargement);
-   al_clear_to_color(al_map_rgba(0,0,0,0));
-   al_draw_rotated_bitmap(chargement_1, al_get_bitmap_width(chargement_1)/2.0, al_get_bitmap_height(chargement_1)/2.0,
-                          x, y, 4*progression/duree*ALLEGRO_PI/2.0, 0);
-   al_draw_rotated_bitmap(chargement_2, al_get_bitmap_width(chargement_2)/2.0, al_get_bitmap_height(chargement_2)/2.0,
-                          x, y, 6*progression/duree*ALLEGRO_PI/4.0, 0);
-   al_draw_rotated_bitmap(chargement_3, al_get_bitmap_width(chargement_3)/2.0, al_get_bitmap_height(chargement_3)/2.0,
-                          x, y, 8*progression/duree*ALLEGRO_PI/6.0, 0);
-
-   al_set_target_backbuffer(display);
-   al_draw_bitmap(n_chargement,0,0,0);
-   al_destroy_bitmap(chargement_1);
-   al_destroy_bitmap(chargement_2);
-   al_destroy_bitmap(chargement_3);
-   al_destroy_bitmap(n_chargement);
-}
-
-void R_chargement(void)
-{
-    ALLEGRO_BITMAP *logo, *titre;
-    logo=al_load_bitmap("R_logo.png");
-    titre=al_load_bitmap("R_title.png");
-
-    Fond = al_load_bitmap("R_fond.png");//
-
-    Set_progress(200.0f,0.0f);
-    while(progression<duree)
+    switch(activite)
     {
-
-        al_set_target_backbuffer(display);
-        al_draw_bitmap(Fond,0,0,0);
-        Afficher_titre();
-        al_flip_display();
-
-        progression++;
+        case  R_ACTIVITE_MENU_PRINCIPAL:
+            Actualiser_activite=R_actualiser_menu_principal;
+            reafficher=1;
+            break;
+        case  R_ACTIVITE_MENU_JOUER:
+            break;
+        case  R_ACTIVITE_MENU_OPTIONS:
+            break;
+        case  R_ACTIVITE_QUITTER:
+            break;
+        case  R_ACTIVITE_JEU_NOUVEAU_JEU:
+            break;
+        case  R_ACTIVITE_JEU_ENCOURS:
+            Actualiser_activite=R_actualiser_jeu_encours;
+            reafficher=1;
+            break;
+        case  R_ACTIVITE_JEU_REPRENDRE:
+            break;
+        case  R_ACTIVITE_JEU_EN_PAUSE:
+            break;
+        case  R_ACTIVITE_JEU_OPTIONS:
+            break;
+        case  R_ACTIVITE_JEU_PYRAMIDE_REF:
+            break;
+        case  R_ACTIVITE_JEU_PARTIE_TERMINER:
+            break;
     }
-
-    al_draw_bitmap(Fond,0,0,0);
-    al_draw_bitmap(titre, largeur_ecran/2-al_get_bitmap_width(titre)/2.0, hauteur_ecran/2-al_get_bitmap_height(titre)/2.0,0);
-    al_flip_display();
-    al_rest(3.0);
-
-    al_draw_bitmap(Fond,0,0,0);
-    al_draw_bitmap(logo, largeur_ecran/2-al_get_bitmap_width(logo)/2.0, hauteur_ecran/2-al_get_bitmap_height(logo)/2.0,0);
-    al_flip_display();
-    al_rest(2.0);
-
-    Set_progress(100.0f,0.0f);
-    while(progression<5*duree)
-    {
-        al_set_target_backbuffer(display);
-        al_draw_bitmap(Fond,0,0,0);
-        al_draw_bitmap(logo, largeur_ecran/2-al_get_bitmap_width(logo)/2.0, hauteur_ecran/2-al_get_bitmap_height(logo)/2.0,0);
-        Afficher_progression();
-        al_flip_display();
-
-        progression++;
-    }
-    Fond=al_load_bitmap("uiArithom-01.png");//
-    al_draw_bitmap(Fond,0,0,0);
-
-    al_destroy_bitmap(logo);
 }
+
+

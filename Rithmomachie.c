@@ -5,25 +5,11 @@
  *    .
  */
 
-//#include "Rithmomachie_Data.h"
-#include "Echiquier.h"
+#include "Rithmomachie_Data.h"
+#include "Chargement.h"
+#include "Tablier.h"
 #include "Event.h"
 
-void erreur( const char*txt)
-{
-    ALLEGRO_DISPLAY *d;
-    d = al_is_system_installed( )? al_get_current_display( ) : NULL;
-    al_show_native_message_box( d, "ERREUR", txt, NULL, NULL, 0);
-    exit( EXIT_FAILURE);
-}
-
-ALLEGRO_EVENT_QUEUE *event_queue;
-ALLEGRO_DISPLAY_MODE mode;
-ALLEGRO_DISPLAY *display;
-ALLEGRO_TIMER *timer;
-ALLEGRO_BITMAP *icone;
-int framerate = 100, chrono = 0, nbmode;
-int reafficher=1;
 
 int main(int argc, char **argv)
 {
@@ -37,11 +23,7 @@ int main(int argc, char **argv)
 
 int Afficher_Rithmomachie(void)
 {
-    al_draw_bitmap(Fond,0,0,0);
-    Actualier_echiquier();//
-    Actualiser_plateaux();//
-    //Selectionner_Piece_plateau();//
-    al_flip_display();//
+    Actualiser_activite();
     return 0;
 }
 
@@ -70,49 +52,29 @@ int Arreter_Rithmomachie(void)
 
 void Lancer_Rithmomachie(void)
 {
-    int fin = 0;
-    extern int reafficher ;
-    bool paused = false;
+
+    extern int reafficher,fin, chrono;
+    bool paused;
 
     int test = 0;
 
     if(test)
     {
         //executer test
-        fin=1;
+
     }
 
     R_chargement();
-    //printf("initialisation plateaux encours...\n");
-    Init_echiquier_cases();
-    Init_Plateaux();
-    //printf("initialisation plateaux reussi\n");
+    Init_menu_principal();
+
 
     while (!fin) {
-        ALLEGRO_EVENT event;
-        al_wait_for_event(event_queue, &event);
-        switch (event.type) {
-            case ALLEGRO_EVENT_MOUSE_AXES:
-                souris_set_event(&event);
-                break;
-            case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
-                printf("boton prese");
-                souris_set_event(&event);
-                break;
-            case ALLEGRO_EVENT_MOUSE_BUTTON_UP:
-                souris_set_event(&event);
-                break;
-            case ALLEGRO_EVENT_KEY_DOWN:
-                if(event.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
-                fin = 1;
-                break;
-            case ALLEGRO_EVENT_DISPLAY_CLOSE:
-                fin = 1;
-                break;
-            case ALLEGRO_EVENT_TIMER:
-                if (!paused)
-                    chrono++;
-                break;
+
+        R_wait_for_event();
+
+        if(R_pool_event())
+        {
+          Config_activite(activite_encours);
         }
 
         if (!al_is_event_queue_empty(event_queue)) continue;
@@ -122,12 +84,10 @@ void Lancer_Rithmomachie(void)
             --chrono;
         }
 
-        //reafficher=Actualier_echiquier();//
 
         if (reafficher)
         {
             reafficher=Afficher_Rithmomachie();
-            //Actualier_echiquier();//
         }
 
             souris_tick();
@@ -137,30 +97,30 @@ void Lancer_Rithmomachie(void)
 int Init_Rithmomachie(void)
 {
 
-    if ( ! al_init( ))
+    if ( ! al_init())
         erreur( "al_init() ");
-    if ( ! al_init_image_addon( ))
+    if ( ! al_init_image_addon())
     erreur( "al_init_image_addon()");
-    if ( ! al_init_primitives_addon( ))
+    if ( ! al_init_primitives_addon())
     erreur( "al_init_primitives_addon()");
-    if ( ! al_install_keyboard( ))
+    if ( ! al_install_keyboard())
     erreur( "al_install_keyboard()");
-    if ( ! al_install_mouse( ))
+    if ( ! al_install_mouse())
     erreur( "al_install_mouse()");
-    if ( ! al_install_audio( ))
+    if ( ! al_install_audio())
     erreur( "al_install_audio()");
-    if ( ! al_init_acodec_addon( ))
+    if ( ! al_init_acodec_addon())
     erreur( "al_init_acodec_addon");
     if(! al_reserve_samples(8))
     erreur( "al_reserve_samples");
-    al_init_font_addon( );
-    al_init_ttf_addon( );
+    al_init_font_addon();
+    al_init_ttf_addon();
 
 
     al_set_app_name("RITMOMACHIE");
     al_set_org_name("@FDS");
 
-    nbmode = al_get_num_display_modes( );
+    nbmode = al_get_num_display_modes();
     al_set_new_display_flags( ALLEGRO_FULLSCREEN_WINDOW);
     al_get_display_mode( nbmode-1, &mode);
     largeur_ecran=mode.width;

@@ -5,56 +5,73 @@
  *    .
  */
 
+#include "Rithmomachie_Data.h"
 #include "Jeu.h"
-#include "Echiquier.h"
+#include "Menu.h"
+#include "GUI.h"
+#include "Moyeu.h"
 
-AFFICHAGE *Ecran_affichage;
-AFFICHAGE *Echiquier_affichage;
-AFFICHAGE *JeuMenu_affichage;
-AFFICHAGE *Joueur1_affichage;
-AFFICHAGE *Joueur2_affichage;
-AFFICHAGE *Plateu1_affichaje;
-AFFICHAGE *Plateu2_affichaje;
+extern CASE Tablier[TABLIER_LIGNE_MAX][TABLIER_COLONNE_MAX];
 
-static JOUEUR Joueur[JOUEUR_MAX];
+ALLEGRO_BITMAP *Fond_jeu;
+BOUTON *jeu_bouton_pause, *jeu_bouton_options, *jeu_bouton_menu_principal;
 
-
-void Init_joueur(AFFICHAGE *affichage, int joueur, char *name)
+void Actualiser_menu_jeu(void)
 {
-   int i, j;
-   float dx, dy;
+    static float sx_avant, sy_avant;
 
-    Joueur[joueur].Joueur_aff = affichage;
-    Joueur[joueur].Name=name;
-}
-
-void Afficher_joueur(int joueur)
-{
+    if(sx_avant!=souris_x()||sy_avant!=souris_y()||souris_bouton_presse(1))
+    {
+        Actualiser_bouton(jeu_bouton_pause);
+        Actualiser_bouton(jeu_bouton_options);
+        Actualiser_bouton(jeu_bouton_menu_principal);
+    }
+    Afficher_bouton(jeu_bouton_pause);
+    Afficher_bouton(jeu_bouton_options);
+    Afficher_bouton(jeu_bouton_menu_principal);
 
 }
-
-static void Afficher_jeu(void)
+void R_actualiser_jeu_encours(void)
 {
-    //afficher_Echiquier();
-    al_draw_bitmap(Ecran_affichage->Bmp, Ecran_affichage->X, Ecran_affichage->Y, 0);
+    al_draw_bitmap(Fond_jeu,0,0,0);
+    Actualiser_menu_jeu();
+    Actualier_tablier();//
+    Actualiser_moyeux();//
+    al_flip_display();//
 }
 
-void Init_affichage_jeu() {
+void Init_jeu(void)
+{
 
-    extern float largeur_ecran;
-    extern float hauteur_ecran;
+    activite_encours=R_ACTIVITE_JEU_ENCOURS;
+    Detruire_menu_principal();
+    jeu_bouton_menu_principal=Creer_bouton(188.71,86.772,al_load_bitmap("jeu_bouton_menu.png"),Init_menu_principal);
+    jeu_bouton_pause=Creer_bouton(307.71,86.772,al_load_bitmap("jeu_bouton_pause.png"),Init_menu_principal);
+    jeu_bouton_options=Creer_bouton(247.71,86.772,al_load_bitmap("jeu_bouton_options.png"),Init_menu_principal);
 
-    Ecran_affichage = Init_affichage("ecran", NULL, 0, 0, largeur_ecran, hauteur_ecran);
-    Joueur1_affichage = Init_affichage("joueur1", Ecran_affichage, (int)(3.0*largeur_ecran/4.0), 0, (int)(1.0*largeur_ecran/4.0), hauteur_ecran/2.0);
-    Echiquier_affichage = Init_affichage("echiquier", Ecran_affichage, 0, 0, (int)(3.0*largeur_ecran/4.0), hauteur_ecran);
-    Joueur2_affichage = Init_affichage("joueur2", Ecran_affichage, (int)(3.0*largeur_ecran/4.0), (int)(1.0*hauteur_ecran/2.0), (int)(1.0*largeur_ecran/4.0), hauteur_ecran/2.0);
+    Fond_jeu=al_load_bitmap("uiArithom-01.png");//
+    //al_draw_bitmap(Fond,0,0,0);
+    Init_tablier_cases();
+    printf("init tablier\n");
+    Init_joueur(Trouver_joueur(0),Tablier[12][6].Pyramide);
+    printf("init joueur1\n");
+    Init_joueur(Trouver_joueur(1),Tablier[3][0].Pyramide);
+    printf("init joueur2\n");
+    printf("init moyeu1...\n");
+    Init_moyeu(Trouver_joueur(0),0,0);
+    printf("init moyeu2...\n");
+    Init_moyeu(Trouver_joueur(1),0,0);
+    //Init_Plateaux();
+    joueur_actuel=Trouver_joueur(0);
+    //activite_encours=R_ACTIVITE_JEU_ENCOURS;
+    //reafficher=1;
 }
 
-void detruire_affichage_jeu()
+void Detruire_jeu(void)
 {
-    Detruire_affichage(Joueur1_affichage);
-    Detruire_affichage(Joueur2_affichage);
-    Detruire_affichage(Echiquier_affichage);
-    Detruire_affichage(Ecran_affichage);
-    al_destroy_bitmap(Fond);
+    al_destroy_bitmap(Fond_jeu);
+    Detruire_bouton(jeu_bouton_pause);
+    Detruire_bouton(jeu_bouton_options);
+    Detruire_bouton(jeu_bouton_menu_principal);
+    Detruire_moyeux_boutons();
 }

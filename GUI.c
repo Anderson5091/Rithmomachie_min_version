@@ -6,47 +6,52 @@
  */
 
 #include "GUI.h"
+#include "Event.h"
 
- BOUTON *Init_bouton(float x, float y, ALLEGRO_BITMAP *main) {
+ BOUTON *Creer_bouton(float x, float y, ALLEGRO_BITMAP *image, void* action){
     BOUTON *bouton = malloc(sizeof(BOUTON));
     bouton->X = x;
     bouton->Y = y;
-    bouton->Main = main;
-    bouton->Etat= Normal;
+    bouton->W=al_get_bitmap_width(image)/2.0;
+    bouton->H=al_get_bitmap_height(image);
+    bouton->Image = image;
+    bouton->Etat= B_Normal;
+    bouton->Action=action;
     return bouton;
 }
 
 void Afficher_bouton(BOUTON *bouton){
+
     float x, y;
-
-    x = bouton->X - al_get_bitmap_width(bouton->Main)/4.0;
-    y = bouton->Y - al_get_bitmap_height(bouton->Main)/4.0;
-    if(bouton->Etat==Normal)
-    al_draw_bitmap_region(bouton->Main, x, y, 0, 0, 0, 0, 0);
-    else if(bouton->Etat==Survol)
-    al_draw_bitmap_region(bouton->Main, x, y, 0, 0, 0, 0, 0);
+    x = bouton->X - bouton->W/2.0;
+    y = bouton->Y - bouton->H/2.0;
+    if(bouton->Etat==B_Normal)
+    al_draw_bitmap_region(bouton->Image,0, 0, bouton->W, bouton->H, x, y, 0);
+    else
+    al_draw_bitmap_region(bouton->Image, bouton->W, 0,bouton->W, bouton->H, x, y, 0);
 }
 
-AFFICHAGE * Init_affichage(char *name, AFFICHAGE *parent, int x, int y, int w, int h){
-    AFFICHAGE *affichage = malloc(sizeof(AFFICHAGE));
-    affichage->Bmp = al_create_bitmap(w, h);
-    affichage->Parent = (parent == 0) ? NULL : parent;
-    affichage->Name = name;
-    affichage->X = x;
-    affichage->Y = y;
-    affichage->W = w;
-    affichage->H = h;
+void Actualiser_bouton(BOUTON *bouton)
+{
+    if (souris_x() > ( bouton->X - bouton->W/ 2.0) && souris_x() < (bouton->X + bouton->W / 2.0)) {
+        if (souris_y() > (bouton->Y - bouton->H / 2.0) && souris_y() < (bouton->Y + bouton->H / 2.0)) {
+            bouton->Etat =B_Survol ;
+            if (souris_bouton_presse(1)) {
+                bouton->Etat=B_Actif;
+                bouton->Action();
+            }
+        } else {
+            bouton->Etat =B_Normal ;
+        }
+    } else {
+        bouton->Etat =B_Normal ;
+    }
 }
 
-void Afficher_affichage(AFFICHAGE *affichage){
-    ALLEGRO_BITMAP *last_bmp = al_get_target_bitmap();
-    if (affichage->Parent) al_set_target_bitmap(affichage->Parent->Bmp);
-    al_draw_bitmap(affichage->Bmp, affichage->X, affichage->Y, 0);
-    al_set_target_bitmap(last_bmp);
-}
-
-void Detruire_affichage(AFFICHAGE *affichage){
-    al_destroy_bitmap(affichage->Bmp);
-    free(affichage);
+void Detruire_bouton(BOUTON *bouton)
+{
+    al_destroy_bitmap(bouton->Image);
+    //free(bouton);
+    bouton=NULL;
 }
 

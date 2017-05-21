@@ -9,37 +9,23 @@
 #define R_GUI_H
 
 #include "Rithmomachie_Data.h"
-
 typedef enum B_ETAT{
-    Normal,
-    Survol,
+    B_Normal,
+    B_Actif,
+    B_Survol,
 } B_ETAT;
 
 typedef struct BOUTON {
-    float X, Y;
+    float X, Y, W, H;
     B_ETAT Etat;
-    ALLEGRO_BITMAP *Main;
+    ALLEGRO_BITMAP *Image;
     void (*Action)(void);
 } BOUTON;
 
-typedef struct AFFICHAGE{
-    char *Name;
-    struct AFFICHAGE *Parent;
-    ALLEGRO_BITMAP * Bmp;
-    int W;
-    int H;
-    int X;
-    int Y;
-}AFFICHAGE;
-
-BOUTON *Init_bouton(float x, float y, ALLEGRO_BITMAP *main);
+BOUTON *Creer_bouton(float x, float y, ALLEGRO_BITMAP *image, void *action);
+void Actualiser_bouton(BOUTON *bouton);
 void Afficher_bouton(BOUTON *bouton);
 void Detruire_bouton(BOUTON *bouton);
-
-AFFICHAGE * Init_affichage(char *name, AFFICHAGE *parent, int x, int y, int l, int h);
-void Afficher_affichage(AFFICHAGE *affichage);
-void Detruire_affichage(AFFICHAGE *affichage);
-
 
 #endif //R_GUI_H
 

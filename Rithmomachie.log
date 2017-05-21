@@ -1,0 +1,33 @@
+
+Rithmomachie ok[5-Mai-2017]
+Rithmomachie create[]
+Rithmomachie_Files[
+    file: Chargement.c && Chargement.h              date:    description:
+    File: Deplacement.c && Deplacement.h            date:    description:
+    File: Event.c && Event.h                        date:    description:
+    File: GUI.c && GUI.h                            date:    description:
+    File: Jeu.c && Jeu.c                            date:    description:
+    File: Menu.c && Menu.c                          date:    description:
+    File: Moyeu.c && Moyeu.h                        date:    description:
+    File: Piece.c && Piece.c                        date:    description:
+    File: Prise.c && Prise.c                        date:    description:
+    File: Rithmomachie.c && Rithmomachie.c          date:    description:
+    File: Rithmomachie_Data.c &&
+            Rithmomachie_Data.c                      date:    description:
+    File: Tablier.c && Tablier.c                    date:    description:
+
+                                                                                                            ]
+
+CHANGE_LOG[
+                    change:         Tablier
+                    depht:          4
+                    author:         Anderson5091
+                    date:           26-avril-17
+                    comment:        "Big change on Rithmmachie"
+                    MODIFICATION:   Echiquier.c,Echiquier.h RENAME_TO Tablier.c, Tablier.h
+                    AFFECTED_FILES:
+                    WORD_CHANGES:   Echiquier TO Tablier
+                                    _echiquier TO _tablier
+                                    ECHIQUIER TO TABLIER
+                                    ECHIQUIER_ TO TABLIER_
+                                                                                                ]

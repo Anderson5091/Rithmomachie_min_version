@@ -1,107 +1,95 @@
 
+/*
+ *    RITHMOMACHIE - Created by Anderson5091 10/Avril/17.
+ *                 - Fin de creation 23/Avril/2017.
+ *      ce module peremet de gerer l'ensemble de tous les deplacement possible
+ *      en prenant en compte que deux parametre une case de depart et une case d'arrivee dans l'Tablier.
+ *    .
+ */
+
 #include"Piece.h"
-#include"Echiquier.h"
-#include "Deplacement.h"
+#include"Tablier.h"
+#include"Deplacement.h"
 
-extern CASE Echiquier[ECHIQUIER_LIGNE_MAX][ECHIQUIER_COLONNE_MAX];
+bool deplacement;
 CASE *deplacer_de_case, *deplacer_vers_case;
-PIECE *deplacer_piece_de_plateau, *deplacer_piece_de_plateau;
+PIECE *deplacer_de_moyeux;
 
-//extern PIECE* Plateau_1[PLATEAU_LIGNE_MAX][PLATEAU_COLONNE_MAX];
-//extern PIECE* Plateau_2[PLATEAU_LIGNE_MAX][PLATEAU_COLONNE_MAX];
-//extern PIECE *adresse_de_plateau, *adresse_vers_plateau;
 
-bool Isset_deplacer_de_case(void)
-{
+bool Isset_deplacement(void){
+    return deplacement;
+}
+
+void Set_deplacement(void){
+   deplacement=TRUE;
+}
+
+void Reset_deplacement(void){
+    deplacer_de_case=NULL;
+    deplacer_vers_case=NULL;
+    deplacer_de_moyeux=NULL;
+    deplacement=FALSE;
+}
+
+bool Isset_deplacer_de_case(void){
     if(deplacer_de_case){
-            printf("piece dans case(%d,%d) prete a deplacer\n",
-                   deplacer_de_case->Position.Ligne,deplacer_de_case->Position.Colonne);
+            //printf("piece dans case(%d,%d) prete a deplacer\n",
+                   //deplacer_de_case->Position.Ligne,deplacer_de_case->Position.Colonne);
             return TRUE;
     }
     else{
-            printf("aucune case n'a ete selectionnee\n");
+            //printf("aucune case n'a ete selectionnee\n");
             return FALSE;
     }
 }
 
-bool Isset_deplacer_vers_case(void)
-{
+bool Isset_deplacer_vers_case(void){
     if(deplacer_vers_case)
     return TRUE;
     else
     return FALSE;
 }
 
-void Set_deplacer_de_case(CASE* cs)
-{
-    if((cs->Piece)||(cs->Pyramide))
-    {deplacer_de_case=cs;
-    set_domaine_validite_deplacement(cs);
-    printf("case a deplaser reference...\n");
-    printf("pointer sur case: (%d, %d)\n", deplacer_de_case->Position.Ligne,
-                       deplacer_de_case->Position.Colonne);}
+bool Isset_deplacer_de_moyeux(void){
+    if(deplacer_de_moyeux)
+    return TRUE;
     else
-    {
-       printf("case vide\n");
-    }
+    return FALSE;
 }
 
-void Set_deplacer_vers_case(CASE* cs)
-{
-    if(!cs->Piece)
-    {deplacer_vers_case=cs;
-    printf("case recepteur reference...\n");
-    printf("pointer vers case: (%d, %d)\n", deplacer_vers_case->Position.Ligne,
-                       deplacer_vers_case->Position.Colonne);}
+void Set_deplacer_de_case(CASE* cs){
+    if((cs->Piece)||(cs->Pyramide))
+        deplacer_de_case=cs;
     else{
-        printf("case occupee\n");
+       // printf("case vide\n");
     }
 }
 
-void set_domaine_validite_deplacement(CASE* cs)
-{
-
-    if(cs->Piece)
-    {
-      switch(cs->Piece->Type)
-      {
-        case Cercle:
-            Valider_deplacement=Valider_deplacement_cercle;
-            break;
-        case Triangle:
-            Valider_deplacement=Valider_glissement_triangle;
-            break;
-        case Carre:
-            Valider_deplacement=Valider_glissement_carre;
-            break;
-      }
-    }
-    else if(cs->Pyramide)
-    {
-        if(cs->Pyramide->Compacite)
-        {
-            Valider_deplacement=Valider_glissement_pyramide;
-        }
-        else if((!cs->Pyramide->Compacite)&&(cs->Pyramide->Reference))
-        {
-            switch(cs->Pyramide->Reference->Type)
-              {
-                case Cercle:
-                    Valider_deplacement=Valider_deplacement_cercle;
-                    break;
-                case Triangle:
-                    Valider_deplacement=Valider_glissement_triangle;
-                    break;
-                case Carre:
-                    Valider_deplacement=Valider_glissement_carre;
-                    break;
-              }
-        }
-    }
+void Set_deplacer_vers_case(CASE* cs){
+    //if(!cs->Piece&&!cs->Pyramide)
+        deplacer_vers_case=cs;
+    //else{
+        //printf("case occupee\n");
+    //}
 }
 
-void Deplacer_piece_dans_echiquier(CASE *de_case, CASE* vers_case)
-{
+void Set_deplacer_de_moyeux(PIECE *piece){
+    deplacer_de_moyeux=piece;
+}
+
+CASE* Deplacer_vers_case(void){
+  return deplacer_vers_case;
+}
+
+CASE* Deplacer_de_case(void){
+    return deplacer_de_case;
+}
+
+PIECE* Deplacer_de_moyeux(void){
+    return deplacer_de_moyeux;
+}
+
+void Deplacer_piece_dans_tablier(CASE *de_case, CASE* vers_case){
     Modifier_piece_position(de_case->Piece, Position_vers_point(vers_case->Position));
     vers_case->Piece=de_case->Piece;
     de_case->Piece=NULL;
@@ -110,8 +98,7 @@ void Deplacer_piece_dans_echiquier(CASE *de_case, CASE* vers_case)
 }
 
 
-void Deplacer_pyramide_dans_echiquier(CASE *de_case, CASE* vers_case)
-{
+void Deplacer_pyramide_dans_tablier(CASE *de_case, CASE* vers_case){
     int i;
     for(i=0;i<6;i++)
     {
@@ -123,247 +110,178 @@ void Deplacer_pyramide_dans_echiquier(CASE *de_case, CASE* vers_case)
 
     vers_case->Pyramide=de_case->Pyramide;
     de_case->Pyramide=NULL;
+    de_case->Piece=NULL;
     vers_case=NULL;
     de_case=NULL;
 }
 
-void Lancer_deplacement_case_vers_case(void)
-{
-    if((((!deplacer_vers_case->Piece)&&(!deplacer_vers_case->Piece))&&
-       ((deplacer_de_case->Piece)||(deplacer_de_case->Pyramide)))&&
-       ((*Valider_deplacement)(deplacer_de_case,deplacer_vers_case)))
-    {
-        if(deplacer_de_case->Piece)
-        {
-            Deplacer_piece_dans_echiquier(deplacer_de_case,deplacer_vers_case);
-            deplacer_vers_case=NULL;
-            deplacer_de_case=NULL;
-            printf("Piece deplacee avec succes\n\n");
-        }
-        else if(deplacer_de_case->Pyramide)
-        {
-            Deplacer_pyramide_dans_echiquier(deplacer_de_case,deplacer_vers_case);
-            deplacer_de_case->Pyramide=NULL;
-            deplacer_vers_case=NULL;
-            deplacer_de_case=NULL;
-            printf("Pyramide deplacee avec succes\n\n");
-        }
-    }
-}
+void Deplacement_piece(CASE* de_case,CASE* vers_case){
+    bool pyramide_piece=(de_case->Pyramide)?TRUE:FALSE,still_true;
+    int i=0, nomb_d=0;
+    COORDTAB *liste_deplacement;
+    COORDTAB position=de_case->Position;
 
-bool Valider_deplacement_cercle(CASE *de_case, CASE* vers_case)
-{
-    int i,position_trouver=0;
-    COORDECH position=de_case->Position;
-    COORDECH liste_deplacement_carre[4]={{position.Ligne-1,position.Colonne-1},
-                                         {position.Ligne-1,position.Colonne+1},
-                                         {position.Ligne+1,position.Colonne-1},
-                                         {position.Ligne+1,position.Colonne+1}};
+        if(de_case->Piece->Type==Cercle){
+
+            COORDTAB liste_d[4]={{position.Ligne-1,position.Colonne-1},{position.Ligne-1,position.Colonne+1},{position.Ligne+1,position.Colonne-1},{position.Ligne+1,position.Colonne+1}};
+            nomb_d=4; liste_deplacement=malloc(nomb_d*sizeof(COORDTAB));    for(i=0;i<nomb_d;i++)liste_deplacement[i]=liste_d[i]; if(pyramide_piece){pyramide_piece=FALSE; still_true=TRUE;}
+        }
+        else if(de_case->Piece->Type==Carre){
+            COORDTAB liste_d[12]={{position.Ligne+1,position.Colonne+3},{position.Ligne+1,position.Colonne-3},{position.Ligne-1,position.Colonne+3},{position.Ligne-1,position.Colonne-3},
+                                  {position.Ligne+3,position.Colonne+1},{position.Ligne+3,position.Colonne-1},{position.Ligne-3,position.Colonne+1},{position.Ligne-3,position.Colonne-1},
+                                  {position.Ligne,position.Colonne+3},{position.Ligne,position.Colonne-3},{position.Ligne+3,position.Colonne},{position.Ligne-3,position.Colonne}};
+            nomb_d=12; liste_deplacement=malloc(nomb_d*sizeof(COORDTAB));   for(i=0;i<nomb_d;i++)liste_deplacement[i]=liste_d[i];
+        }
+        else if(de_case->Piece->Type==Triangle){
+            COORDTAB liste_d[12]={{position.Ligne+1,position.Colonne+2},{position.Ligne+1,position.Colonne-2},{position.Ligne-1,position.Colonne+2},{position.Ligne-1,position.Colonne-2},
+                                  {position.Ligne+2,position.Colonne+1},{position.Ligne+2,position.Colonne-1},{position.Ligne-2,position.Colonne+1},{position.Ligne-2,position.Colonne-1},
+                                  {position.Ligne,position.Colonne+2},{position.Ligne,position.Colonne-2},{position.Ligne+2,position.Colonne},{position.Ligne-2,position.Colonne}};
+            nomb_d=12; liste_deplacement=malloc(nomb_d*sizeof(COORDTAB)); for(i=0;i<nomb_d;i++)liste_deplacement[i]=liste_d[i];
+        }
     i=0;
-    while((i<4)&&(!position_trouver))
-    {
-        if((vers_case->Position.Ligne==liste_deplacement_carre[i].Ligne)
-             &&(vers_case->Position.Colonne==liste_deplacement_carre[i].Colonne))
-        {
-            position_trouver=1;
+    nomb_d=(de_case->Piece->Type==Cercle)?8:nomb_d;
+    while(i<nomb_d-4&&!Isset_deplacement()&&!pyramide_piece){
+        if(liste_deplacement[i].Colonne<TABLIER_COLONNE_MAX&&liste_deplacement[i].Ligne<TABLIER_LIGNE_MAX){
+                if(liste_deplacement[i].Colonne>=0&&liste_deplacement[i].Ligne>=0){
+                    if(vers_case==Position_vers_adresse(liste_deplacement[i])){
+                        if(!still_true){
+                            Deplacer_piece_dans_tablier(de_case,vers_case); Set_deplacement();}
+                        else{
+                            de_case->Piece=NULL;
+                            Deplacement_pyramide(de_case,vers_case); Set_deplacement();still_true=FALSE;
+                        }
+                    } else i++;
+                }else i++;
+            }else i++;
+
         }
-        i++;
+    i=8;
+    while(i<nomb_d&&!Isset_deplacement()){
+        if(liste_deplacement[i].Colonne<TABLIER_COLONNE_MAX&&liste_deplacement[i].Ligne<TABLIER_LIGNE_MAX){
+                if(liste_deplacement[i].Colonne>=0&&liste_deplacement[i].Ligne>=0){
+                    if(vers_case==Position_vers_adresse(liste_deplacement[i])
+                       &&(Is_chemin_libre(de_case,i))){
+                        if(!pyramide_piece){
+                            Deplacer_piece_dans_tablier(de_case,vers_case); Set_deplacement();}
+                        else{
+                              de_case->Piece=NULL;
+                              Deplacement_pyramide(de_case,vers_case);pyramide_piece=FALSE; Set_deplacement();
+                        }
+                    }else i++;
+                }else i++;
+            } else i++;
     }
-
-    if(position_trouver)
-        return TRUE;
-    else
-        return FALSE;
+    for(i=0;i<nomb_d;i++)
+        free(liste_deplacement);
 }
 
-bool Valider_glissement_carre(CASE *de_case, CASE* vers_case)
+void Deplacement_pyramide(CASE* de_case,CASE* vers_case){
+  int i=0, nomb_d=24;
+    COORDTAB position=de_case->Position;
+    COORDTAB liste_deplacement[24]={{position.Ligne+1,position.Colonne},{position.Ligne+2,position.Colonne},{position.Ligne+3,position.Colonne},{position.Ligne-1,position.Colonne},{position.Ligne-2,position.Colonne},{position.Ligne-3,position.Colonne},
+        {position.Ligne,position.Colonne+1},{position.Ligne,position.Colonne+2},{position.Ligne,position.Colonne+3},{position.Ligne,position.Colonne-1},{position.Ligne,position.Colonne-2},{position.Ligne,position.Colonne-3},
+        {position.Ligne+1,position.Colonne+1},{position.Ligne+2,position.Colonne+2},{position.Ligne+3,position.Colonne+3},{position.Ligne+1,position.Colonne-1},{position.Ligne+2,position.Colonne-2},{position.Ligne+3,position.Colonne-3},
+        {position.Ligne-1,position.Colonne-1},{position.Ligne-2,position.Colonne-2},{position.Ligne-3,position.Colonne-3},{position.Ligne-1,position.Colonne+1},{position.Ligne-2,position.Colonne+2},{position.Ligne-3,position.Colonne+3}};
+
+    while(i<24 && !Isset_deplacement()){
+        if(liste_deplacement[i].Colonne<TABLIER_COLONNE_MAX&&liste_deplacement[i].Ligne<TABLIER_LIGNE_MAX){
+            if(liste_deplacement[i].Colonne>=0&&liste_deplacement[i].Ligne>=0){
+                if(vers_case==Position_vers_adresse(liste_deplacement[i])&&
+                    (Is_chemin_libre(de_case,i))){
+                        Deplacer_pyramide_dans_tablier(de_case,vers_case); Set_deplacement();
+                }else i++;
+            }else i++;
+        } else i++;
+    }
+}
+
+void Lancer_deplacement(CASE* de_case,CASE* vers_case ){
+   if(de_case->Piece){
+       Deplacement_piece(de_case,vers_case);
+   }
+   else if(de_case->Pyramide){
+       if(de_case->Pyramide->Compacite){
+           Deplacement_pyramide(de_case,vers_case);
+       }
+       else{
+            if(de_case->Pyramide->Reference){
+                de_case->Piece=de_case->Pyramide->Reference;
+                Deplacement_piece(de_case,vers_case); de_case->Piece=NULL;
+            }
+       }
+   }
+}
+
+void Deplacer_piece_vers_moyeu_plateau(PIECE* piece, int joueur_id)
 {
-    int i,position_trouver=0;
-    COORDECH position=de_case->Position;
-    COORDECH liste_glissement_carre[4]={{position.Ligne,position.Colonne+3},
-                                        {position.Ligne,position.Colonne-3},
-                                        {position.Ligne+3,position.Colonne},
-                                        {position.Ligne-3,position.Colonne}};
-    i=0;
-    while((i<4)&&(!position_trouver))
-    {
-        if((vers_case->Position.Ligne==liste_glissement_carre[i].Ligne)
-             &&(vers_case->Position.Colonne==liste_glissement_carre[i].Colonne))
-        {
-            position_trouver=1;
+    extern MOYEU Moyeux[JOUEUR_MAX];
+   float dx=(joueur_id==0)?26.286:1340.286, dy=449.34;
+   int j=0, i=(piece->Type==Cercle)?0:((piece->Type==Triangle)?1:2);
+   COORDPOINT pt;
+
+   while(Moyeux[joueur_id].Plateau[i][j]&&j<PLATEAU_COLONNE_MAX){
+       j++;
+   }
+   if(j<PLATEAU_COLONNE_MAX){
+        pt.X=(joueur_id==0)?dx+j*DIM_CASE:dx-j*DIM_CASE; pt.Y=dy+i*DIM_CASE;
+        Moyeux[joueur_id].Plateau[i][j]=piece;
+        Modifier_piece_position(piece, pt);
+        Modifier_piece_etat(piece, P_Prise);
+   }
+}
+
+void Deplacer_piece_vers_tablier(PIECE* piece, MOYEU* moyeu, CASE* vers_case)
+{
+    Modifier_piece_color(piece,(moyeu->Joueur->Id==0)?P_Blanc:P_Noir);
+    Modifier_piece_position(piece, Position_vers_point(vers_case->Position));
+    Modifier_piece_etat(piece, P_Libre);
+    vers_case->Piece=piece;
+    //printf("pieces deplacer\n");
+    Retirer_piece_dans_moyeu_plateau(piece, moyeu);
+    //printf("piece retire dans moyeu\n");
+}
+
+bool Is_chemin_libre(CASE *de_case, int i)
+{
+    CASE* chemin[2]={NULL,NULL};
+    bool chemin_libre=FALSE;
+    if(de_case->Piece){
+        if(de_case->Piece->Type==Triangle){
+            switch(i){
+                case 8: chemin[0]=de_case+1; break; case 9: chemin[0]=de_case-1;break;
+                case 10:chemin[0]=de_case+8; break; case 11: chemin[0]=de_case-8; break;
+            }
+            if(!chemin[0]->Piece&&!chemin[0]->Pyramide)
+                chemin_libre=TRUE;
         }
-        i++;
-    }
-
-    if(position_trouver)
-        return TRUE;
-    else if(de_case->Piece)
-        return Valider_saut_carre(de_case,vers_case);
-    else
-        return FALSE;
-}
-
-bool Valider_saut_carre(CASE *de_case, CASE* vers_case)
-{
-    int i,position_trouver=0;
-    COORDECH position=de_case->Position;
-    COORDECH liste_saut_carre[8]={{position.Ligne+1,position.Colonne+3},
-                                  {position.Ligne+1,position.Colonne-3},
-                                  {position.Ligne-1,position.Colonne+3},
-                                  {position.Ligne-1,position.Colonne-3},
-                                  {position.Ligne+3,position.Colonne+1},
-                                  {position.Ligne+3,position.Colonne-1},
-                                  {position.Ligne-3,position.Colonne+1},
-                                  {position.Ligne-3,position.Colonne-1}};
-    i=0;
-    while((i<8)&&(!position_trouver))
-    {
-        if((vers_case->Position.Ligne==liste_saut_carre[i].Ligne)
-             &&(vers_case->Position.Colonne==liste_saut_carre[i].Colonne))
-        {
-            position_trouver=1;
+        else if(de_case->Piece->Type==Carre){
+            switch(i){
+                case 8: chemin[0]=de_case+1; chemin[1]=de_case+2; break; case 9: chemin[0]=de_case-1; chemin[1]=de_case-2; break;
+                case 10: chemin[0]=de_case+8; chemin[1]=de_case+16; break; case 11: chemin[0]=de_case-8; chemin[1]=de_case-16; break;
+            }
+            if((!chemin[0]->Piece&&!chemin[0]->Pyramide)&&(!chemin[1]->Piece&&!chemin[1]->Pyramide))
+                chemin_libre=TRUE;
         }
-        i++;
     }
-
-    if(position_trouver)
-        return TRUE;
-    else
-        return FALSE;
-}
-
-bool Valider_glissement_triangle(CASE *de_case, CASE* vers_case)
-{
-    int i,position_trouver=0;
-    COORDECH position=de_case->Position;
-    COORDECH liste_glissement_triangle[4]={{position.Ligne,position.Colonne+2},
-                                           {position.Ligne,position.Colonne-2},
-                                           {position.Ligne+2,position.Colonne},
-                                           {position.Ligne-2,position.Colonne}};
-    i=0;
-    while((i<4)&&(!position_trouver))
-    {
-        if((vers_case->Position.Ligne==liste_glissement_triangle[i].Ligne)
-             &&(vers_case->Position.Colonne==liste_glissement_triangle[i].Colonne))
-        {
-            position_trouver=1;
+    else if(de_case->Pyramide){
+        switch(i){
+            case 1: chemin[0]=de_case+8; break; case 2: chemin[0]=de_case+8; chemin[1]=de_case+16; break; case 4: chemin[0]=de_case-8;break; case 5: chemin[0]=de_case-8; chemin[1]=de_case-16; break;
+            case 7: chemin[0]=de_case+1; break; case 8: chemin[0]=de_case+1; chemin[1]=de_case+2; break; case 10: chemin[0]=de_case-1;break; case 11: chemin[0]=de_case-1; chemin[1]=de_case-2; break;
+            case 13: chemin[0]=de_case+1+8; break; case 14: chemin[0]=de_case+1+8; chemin[1]=de_case+2+16; break; case 16: chemin[0]=de_case-1+8; break; case 17: chemin[0]=de_case-1; chemin[1]=de_case-2+16;break;
+            case 19: chemin[0]=de_case-1-8; break; case 20: chemin[0]=de_case-1-8; chemin[1]=de_case-2-16; break; case 22: chemin[0]=de_case+1-8;break; case 23: chemin[0]=de_case+1-8; chemin[1]=de_case+2-16;break;
+            default: chemin_libre=TRUE; break;
         }
-        i++;
-    }
-
-    if(position_trouver)
-        return TRUE;
-    else if(de_case->Piece)
-        return Valider_saut_triangle(de_case,vers_case);
-    else
-        return FALSE;
-}
-
-bool Valider_saut_triangle(CASE *de_case, CASE* vers_case)
-{
-    int i,position_trouver=0;
-    COORDECH position=de_case->Position;
-    COORDECH liste_saut_carre[8]={{position.Ligne+1,position.Colonne+2},
-                                  {position.Ligne+1,position.Colonne-2},
-                                  {position.Ligne-1,position.Colonne+2},
-                                  {position.Ligne-1,position.Colonne-2},
-                                  {position.Ligne+2,position.Colonne+1},
-                                  {position.Ligne+2,position.Colonne-1},
-                                  {position.Ligne-2,position.Colonne+1},
-                                  {position.Ligne-2,position.Colonne-1}};
-    i=0;
-    while((i<8)&&(!position_trouver))
-    {
-        if((vers_case->Position.Ligne==liste_saut_carre[i].Ligne)
-             &&(vers_case->Position.Colonne==liste_saut_carre[i].Colonne))
-        {
-            position_trouver=1;
+        if(chemin[0]&&!chemin[1]){
+            if(!chemin[0]->Piece&&!chemin[0]->Pyramide)
+                chemin_libre=TRUE;
         }
-        i++;
-    }
-
-    if(position_trouver)
-        return TRUE;
-    else
-        return FALSE;
-}
-
-bool Valider_glissement_pyramide(CASE *de_case, CASE* vers_case)
-{
-    int i,position_trouver=0;
-    COORDECH position=de_case->Position;
-    COORDECH liste_glissement_pyramide[24]={
-        {position.Ligne+1,position.Colonne},{position.Ligne+2,position.Colonne},{position.Ligne+3,position.Colonne},
-        {position.Ligne-1,position.Colonne},{position.Ligne-2,position.Colonne},{position.Ligne-3,position.Colonne},
-        {position.Ligne,position.Colonne+1},{position.Ligne,position.Colonne+2},{position.Ligne,position.Colonne+3},
-        {position.Ligne,position.Colonne-1},{position.Ligne,position.Colonne-2},{position.Ligne,position.Colonne-3},
-        {position.Ligne+1,position.Colonne+1},{position.Ligne+2,position.Colonne+2},{position.Ligne+3,position.Colonne+3},
-        {position.Ligne+1,position.Colonne-1},{position.Ligne+2,position.Colonne-2},{position.Ligne+3,position.Colonne-3},
-        {position.Ligne-1,position.Colonne-1},{position.Ligne-2,position.Colonne-2},{position.Ligne-3,position.Colonne-3},
-        {position.Ligne-1,position.Colonne+1},{position.Ligne-2,position.Colonne+2},{position.Ligne-3,position.Colonne+3}};
-
-    i=0;
-    while((i<24)&&(!position_trouver))
-    {
-        if((vers_case->Position.Ligne==liste_glissement_pyramide[i].Ligne)
-             &&(vers_case->Position.Colonne==liste_glissement_pyramide[i].Colonne))
-        {
-            position_trouver=1;
+        else if(chemin[0]&&chemin[1]){
+            if((!chemin[0]->Piece&&!chemin[0]->Pyramide)&&(!chemin[1]->Piece&&!chemin[1]->Pyramide))
+                chemin_libre=TRUE;
         }
-        i++;
+
     }
 
-    if(position_trouver)
-        return TRUE;
-    else
-        return FALSE;
+    return chemin_libre;
 }
 
-/*
-bool piece_en_deplacement_de_tableau(void)
-{
-    if (deplacer_piece_de_plateau{
-        return TRUE;
-    }
-    else
-    {
-        return FALSE;
-    }
-}
-
-*/
-/*
-void Actualiser_piece_a_deplacer_de_plateau(PIECE* piece_a_deplacer)
-{
-    deplacer_piece_de_plateau=piece_a_deplacer;
-}
-
-
-void Deplacer_piece_vers_Echiquier(PIECE *Adresse_piece,COORDECH position)
-{
-
-    if(!Echiquier[position.Ligne][position.Colonne].Piece)
-    {
-        Echiquier[position.Ligne][position.Colonne].Piece=Adresse_piece;
-        Adresse_piece=NULL;
-        //regroupe les pieces en placant chaque piece a la place de la piece avant jusqua la piece retire;
-    }
-}
-
-
-void Deplacer_dans_echiquier(CASE *deplacer_de, CASE *deplacer_vers)
-{
-    if((!pointer_vers_case->Piece) && (!pointer_vers_case->Pyramide))
-    {
-        printf(" deplacemnt piece case(%d,%d) vers case(%d,%d) encours ...\n",
-                pointer_sur_case->Position.Ligne,pointer_sur_case->Position.Colonne,
-                pointer_vers_case->Position.Ligne,pointer_vers_case->Position.Colonne);
-
-        pointer_vers_case->Piece=pointer_sur_case->Piece;
-        Echiquier[][]=
-        Echiquier[][]
-        printf("piece deplacee\n");
-        pointer_sur_case->Piece=NULL;
-    }
-}
-*/
